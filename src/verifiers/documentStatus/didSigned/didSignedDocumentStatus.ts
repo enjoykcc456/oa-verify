@@ -182,6 +182,8 @@ const verifyV2 = async (
     },
   };
 
+  console.log(`Time taken: ${new Date().getTime() - startTime}ms`);
+
   if (ValidDidSignedDataV2.guard(data)) {
     return {
       name,
@@ -205,8 +207,6 @@ const verifyV2 = async (
       "UNEXPECTED_ERROR"
     );
   }
-
-  console.log(`Time taken: ${new Date().getTime() - startTime}ms`);
 
   return {
     name,
