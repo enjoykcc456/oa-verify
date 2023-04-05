@@ -59,6 +59,8 @@ const verifyV2 = async (
   document: SignedWrappedDocument<v2.OpenAttestationDocument>,
   options: VerifierOptions
 ): Promise<OpenAttestationDidSignedDocumentStatusVerificationFragment> => {
+  const startTime = new Date().getTime();
+
   const documentData = getData(document);
   const merkleRoot = `0x${document.signature.merkleRoot}`;
   const { targetHash, proof: proofs } = document.signature;
@@ -203,6 +205,9 @@ const verifyV2 = async (
       "UNEXPECTED_ERROR"
     );
   }
+
+  console.log(`Time taken: ${new Date().getTime() - startTime}ms`);
+
   return {
     name,
     type,
