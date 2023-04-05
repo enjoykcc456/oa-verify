@@ -6,6 +6,7 @@ import {
   OcspResponderRevocationStatus,
 } from "src/verifiers/documentStatus/revocation.types";
 import { Reason } from "./error";
+import { Logger } from "@nestjs/common";
 
 /**
  * Callback function that will provide back the promises resolving to the verification fragment. It will be called before the promises are all resolved and thus give the possibility to consumers to perform their own extra checks.
@@ -103,7 +104,7 @@ export type AllVerificationFragment<Data = any> = VerificationFragmentWithData<D
 export interface Verifier<V extends VerificationFragment> {
   skip: (document: DocumentsToVerify, options: VerifierOptions) => Promise<SkippedVerificationFragment>;
   test: (document: DocumentsToVerify, options: VerifierOptions) => boolean;
-  verify: (document: DocumentsToVerify, options: VerifierOptions) => Promise<V>;
+  verify: (document: DocumentsToVerify, options: VerifierOptions, logger: Logger) => Promise<V>;
 }
 export type Hash = string;
 

@@ -16,6 +16,7 @@ import {
   ValidOcspResponse2,
   ValidOcspResponseRevoked2,
 } from "./didSigned/didSignedDocumentStatus.type";
+import { Logger } from "@nestjs/common";
 
 export const getIntermediateHashes = (targetHash: Hash, proofs: Hash[] = []) => {
   const hashes = [`0x${targetHash}`];
@@ -172,15 +173,18 @@ export const isRevokedByOcspResponder2 = async ({
   targetHash,
   proofs,
   location,
+  logger,
 }: {
   merkleRoot: string;
   targetHash: Hash;
   proofs?: Hash[];
   location: string;
+  logger: Logger;
 }): Promise<RevocationStatus> => {
   const intermediateHashes = getIntermediateHashes(targetHash, proofs);
 
   for (const hash of intermediateHashes) {
+    const startTime = new Date().getTime();
     const { data } = await axios.get(`${location}/${hash}`).catch((e) => {
       throw new CodedError(
         `Invalid or unexpected response from OCSP Responder - ${e}`,
@@ -188,6 +192,8 @@ export const isRevokedByOcspResponder2 = async ({
         "OCSP_RESPONSE_INVALID"
       );
     });
+
+    logger.log(`[GDProfiler] [isRevokedByOcspResponder2AxiosCall] Time taken: ${new Date().getTime() - startTime}ms`);
 
     if (ValidOcspResponse2.guard(data)) {
       continue;

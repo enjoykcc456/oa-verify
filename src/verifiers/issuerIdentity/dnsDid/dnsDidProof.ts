@@ -10,6 +10,7 @@ import {
   ValidDnsDidVerificationStatus,
   ValidDnsDidVerificationStatusArray,
 } from "./dnsDidProof.type";
+import { Logger } from "@nestjs/common";
 
 const name = "OpenAttestationDnsDidIdentityProof";
 const type: VerificationFragmentType = "ISSUER_IDENTITY";
@@ -54,8 +55,10 @@ const verifyIssuerDnsDid = async ({
 };
 
 const verifyV2 = async (
-  document: v2.SignedWrappedDocument
+  document: v2.SignedWrappedDocument,
+  logger: Logger
 ): Promise<OpenAttestationDnsDidIdentityProofVerificationFragment> => {
+  const startTime = new Date().getTime();
   const documentData = getData(document);
   const deferredVerificationStatus: Promise<DnsDidVerificationStatus>[] = documentData.issuers.map((issuer) => {
     const { identityProof } = issuer;
@@ -86,7 +89,10 @@ const verifyV2 = async (
       );
     return verifyIssuerDnsDid({ key, location });
   });
+
   const verificationStatus = await Promise.all(deferredVerificationStatus);
+
+  logger.log(`[GDProfiler] [verifyIssuerDidV2] Time taken: ${new Date().getTime() - startTime}ms`);
 
   if (ValidDnsDidVerificationStatusArray.guard(verificationStatus)) {
     return {
@@ -144,8 +150,8 @@ const verifyV3 = async (
   };
 };
 
-const verify: VerifierType["verify"] = async (document) => {
-  if (utils.isSignedWrappedV2Document(document)) return verifyV2(document);
+const verify: VerifierType["verify"] = async (document, options, logger) => {
+  if (utils.isSignedWrappedV2Document(document)) return verifyV2(document, logger);
   else if (utils.isSignedWrappedV3Document(document)) return verifyV3(document);
   throw new CodedError(
     "Document does not match either v2 or v3 formats. Consider using `utils.diagnose` from open-attestation to find out more.",

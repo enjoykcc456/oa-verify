@@ -1,6 +1,6 @@
 {
   "name": "@enjoykcc/oa-verify",
-  "version": "v7.12.0-test-2",
+  "version": "v7.12.0-test-3",
   "description": "",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -29,6 +29,7 @@
     "@govtechsg/document-store": "^2.2.3",
     "@govtechsg/open-attestation": "^6.2.0",
     "@govtechsg/token-registry": "^2.5.3",
+    "@nestjs/common": "^9.3.12",
     "axios": "^0.21.4",
     "debug": "^4.3.1",
     "did-resolver": "^3.1.0",

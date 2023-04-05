@@ -26,8 +26,11 @@ const test: VerifierType["test"] = (document) => {
   return utils.isWrappedV3Document(document) || utils.isWrappedV2Document(document);
 };
 
-const verify: VerifierType["verify"] = async (document) => {
+const verify: VerifierType["verify"] = async (document, options, logger) => {
+  const startTime = new Date().getTime();
   const hash = await verifySignature(document);
+  logger.log(`[GDProfiler] [verifyDocumentIntegrityV2] Time taken: ${new Date().getTime() - startTime}ms`);
+
   if (!hash) {
     return {
       type,

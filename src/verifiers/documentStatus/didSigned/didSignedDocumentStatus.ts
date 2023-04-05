@@ -15,6 +15,7 @@ import {
   ValidDidSignedDataV2,
   ValidDidSignedIssuanceStatus,
 } from "./didSignedDocumentStatus.type";
+import { Logger } from "@nestjs/common";
 
 const name = "OpenAttestationDidSignedDocumentStatus";
 const type: VerificationFragmentType = "DOCUMENT_STATUS";
@@ -57,7 +58,8 @@ const transformToDidSignedIssuanceStatus = (status: DidVerificationStatus): DidS
 
 const verifyV2 = async (
   document: SignedWrappedDocument<v2.OpenAttestationDocument>,
-  options: VerifierOptions
+  options: VerifierOptions,
+  logger: Logger
 ): Promise<OpenAttestationDidSignedDocumentStatusVerificationFragment> => {
   const startTime = new Date().getTime();
 
@@ -107,6 +109,7 @@ const verifyV2 = async (
             targetHash,
             proofs,
             location,
+            logger,
           }).catch(() =>
             // FIXME: Omit this catch fallback after removing support for old OCSP responders
             isRevokedByOcspResponder({ certificateId: documentData.id as string, location })
@@ -128,7 +131,13 @@ const verifyV2 = async (
     }
   };
 
+  const promiseAllRevocationStatusCallbackStartTime = new Date().getTime();
   const revocationStatuses = await Promise.all((revocation as v2.Revocation[]).map(revocationStatusCallback));
+  logger.log(
+    `[GDProfiler] [promiseAllRevocationStatusCallbackStartTime] Time taken: ${
+      new Date().getTime() - promiseAllRevocationStatusCallbackStartTime
+    }ms`
+  );
 
   // Check that all the issuers have signed on the document
   if (!document.proof)
@@ -169,7 +178,14 @@ const verifyV2 = async (
     });
   });
 
+  const promiseAllSignatureVerificationDeferredStartTime = new Date().getTime();
   const issuance = await (await Promise.all(signatureVerificationDeferred)).map(transformToDidSignedIssuanceStatus);
+  logger.log(
+    `[GDProfiler] [promiseAllSignatureVerificationDeferredStartTime] Time taken: ${
+      new Date().getTime() - promiseAllSignatureVerificationDeferredStartTime
+    }ms`
+  );
+
   const notIssued = issuance.find(InvalidDidSignedIssuanceStatus.guard);
   const revoked = revocationStatuses.find(InvalidRevocationStatus.guard);
 
@@ -182,7 +198,7 @@ const verifyV2 = async (
     },
   };
 
-  console.log(`Time taken: ${new Date().getTime() - startTime}ms`);
+  logger.log(`[GDProfiler] [verifyDocumentStatusV2] Time taken: ${new Date().getTime() - startTime}ms`);
 
   if (ValidDidSignedDataV2.guard(data)) {
     return {
@@ -332,9 +348,9 @@ const verifyV3 = async (
   };
 };
 
-const verify: VerifierType["verify"] = async (document, options) => {
+const verify: VerifierType["verify"] = async (document, options, logger) => {
   if (utils.isSignedWrappedV2Document(document)) {
-    return verifyV2(document, options);
+    return verifyV2(document, options, logger);
   } else if (utils.isSignedWrappedV3Document(document)) {
     return verifyV3(document, options);
   }

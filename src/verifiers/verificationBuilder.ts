@@ -8,6 +8,7 @@ import {
 } from "../types/core";
 import { getProvider } from "../common/utils";
 import { warnProvider } from "../common/messages";
+import { Logger } from "@nestjs/common";
 
 // keeping the following code for posterity. If we want the function below to return better types, we can use the following
 // type PromiseValue<T> = T extends Promise<infer U> ? U : never;
@@ -19,7 +20,8 @@ import { warnProvider } from "../common/messages";
  */
 export const verificationBuilder = <T extends Verifier<any>>(
   verifiers: T[],
-  builderOptions: VerificationBuilderOptions
+  builderOptions: VerificationBuilderOptions,
+  logger: Logger
 ) => (document: DocumentsToVerify, promisesCallback?: PromiseCallback): Promise<VerificationFragment[]> => {
   // if the user didn't configure an API key and didn't configure a provider or a resolver, then he will likely use a development key. We then warn him once, that he may need to configure things properly, especially for production
   if (
@@ -36,7 +38,7 @@ export const verificationBuilder = <T extends Verifier<any>>(
   };
   const promises = verifiers.map((verifier) => {
     if (verifier.test(document, verifierOptions)) {
-      return verifier.verify(document, verifierOptions);
+      return verifier.verify(document, verifierOptions, logger);
     }
     return verifier.skip(document, verifierOptions);
   });
