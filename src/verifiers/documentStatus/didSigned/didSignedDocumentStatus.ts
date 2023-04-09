@@ -134,7 +134,7 @@ const verifyV2 = async (
   const promiseAllRevocationStatusCallbackStartTime = new Date().getTime();
   const revocationStatuses = await Promise.all((revocation as v2.Revocation[]).map(revocationStatusCallback));
   logger.log(
-    `[GDProfiler] [promiseAllRevocationStatusCallbackStartTime] Time taken: ${
+    `[GDProfiler] [promiseAllRevocationStatusCallback] Time taken: ${
       new Date().getTime() - promiseAllRevocationStatusCallbackStartTime
     }ms`
   );
@@ -181,7 +181,7 @@ const verifyV2 = async (
   const promiseAllSignatureVerificationDeferredStartTime = new Date().getTime();
   const issuance = await (await Promise.all(signatureVerificationDeferred)).map(transformToDidSignedIssuanceStatus);
   logger.log(
-    `[GDProfiler] [promiseAllSignatureVerificationDeferredStartTime] Time taken: ${
+    `[GDProfiler] [promiseAllSignatureVerificationDeferred] Time taken: ${
       new Date().getTime() - promiseAllSignatureVerificationDeferredStartTime
     }ms`
   );

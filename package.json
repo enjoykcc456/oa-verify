@@ -1,6 +1,6 @@
 {
   "name": "@enjoykcc/oa-verify",
-  "version": "v7.12.0-test-3",
+  "version": "v7.12.0-test-5",
   "description": "",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

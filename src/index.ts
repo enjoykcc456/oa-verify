@@ -12,6 +12,7 @@ import { createResolver } from "./did/resolver";
 import { getIdentifier } from "./getIdentifier";
 import * as utils from "./common/utils";
 import util from "util";
+import { Logger } from "@nestjs/common";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 util.deprecate(function infuraApiKey() {}, "'INFURA_API_KEY' has been deprecated, please use 'PROVIDER_API_KEY'.");
@@ -29,7 +30,7 @@ const defaultBuilderOption = {
   network: process.env.PROVIDER_NETWORK || "homestead",
 };
 
-const verify = verificationBuilder(openAttestationVerifiers, defaultBuilderOption);
+const verify = verificationBuilder(openAttestationVerifiers, defaultBuilderOption, new Logger("DefaultLogger"));
 
 export * from "./types/core";
 export * from "./verifiers/documentIntegrity/hash/openAttestationHash.type";

@@ -183,6 +183,8 @@ export const isRevokedByOcspResponder2 = async ({
 }): Promise<RevocationStatus> => {
   const intermediateHashes = getIntermediateHashes(targetHash, proofs);
 
+  const isRevokedByOcspResponder2StartTime = new Date().getTime();
+
   for (const hash of intermediateHashes) {
     const startTime = new Date().getTime();
     const { data } = await axios.get(`${location}/${hash}`).catch((e) => {
@@ -216,6 +218,12 @@ export const isRevokedByOcspResponder2 = async ({
       );
     }
   }
+
+  logger.log(
+    `[GDProfiler] [isRevokedByOcspResponder2] Time taken: ${
+      new Date().getTime() - isRevokedByOcspResponder2StartTime
+    }ms`
+  );
 
   return {
     revoked: false,

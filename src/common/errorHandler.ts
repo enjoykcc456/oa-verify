@@ -1,6 +1,7 @@
+import { Logger } from "@nestjs/common";
 import {
   DocumentsToVerify,
-  ErrorVerificationFragment,
+  // ErrorVerificationFragment,
   VerificationFragment,
   VerificationFragmentType,
   Verifier,
@@ -19,15 +20,16 @@ export const withCodedErrorHandler = <X extends VerificationFragment, T extends 
   errorOptions: ErrorOptions
 ) => async (
   document: DocumentsToVerify,
-  options: VerifierOptions
+  options: VerifierOptions,
+  logger: Logger
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore https://github.com/microsoft/TypeScript/issues/26781
-): ReturnType<T> | Promise<ErrorVerificationFragment<any>> => {
+): any => {
   try {
     // Using return await to ensure async function execute in try block
-    return await verify(document, options);
+    return await verify(document, options, logger);
   } catch (e) {
-    const { message, code, codeString } = e;
+    const { message, code, codeString } = e as any;
     const { name, type, unexpectedErrorCode, unexpectedErrorString } = errorOptions;
     if (message && code && codeString) {
       return {
@@ -47,7 +49,7 @@ export const withCodedErrorHandler = <X extends VerificationFragment, T extends 
         type,
         data: e,
         reason: {
-          message: e.message,
+          message: (e as any).message,
           code: unexpectedErrorCode,
           codeString: unexpectedErrorString,
         },
